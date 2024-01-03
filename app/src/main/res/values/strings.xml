@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">TrackApp</string>
+    <string name="map_key" translatable="false">AIzaSyDGUXvxYfyGbgIucBXIgZmF4c7SmGD51h8</string>
+</resources>
