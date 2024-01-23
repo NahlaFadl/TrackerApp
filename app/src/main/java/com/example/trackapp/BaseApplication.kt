@@ -1,6 +1,7 @@
-package com.example.trackapp.di
+package com.example.trackapp
 
 import android.app.Application
+import androidx.multidex.MultiDexApplication
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
