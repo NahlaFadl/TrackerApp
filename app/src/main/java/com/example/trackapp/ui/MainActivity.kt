@@ -1,5 +1,6 @@
 package com.example.trackapp.ui
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -9,6 +10,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.trackapp.R
 import com.example.trackapp.db.RunDao
+import com.example.trackapp.other.Constants.ACTION_SHOW_TRACKING_FRAGMENT
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -18,14 +20,16 @@ class MainActivity : AppCompatActivity() {
 
 //    private lateinit var dataBinding: ActivityMainBinding
     private var navController: NavController? = null
+    private lateinit var navHostFragment:NavHostFragment
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        navigationToTrackingFragmentIfNeeded(intent)
 
 //        dataBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 //        dataBinding.lifecycleOwner = this
 
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.navHostFragment) as NavHostFragment
+        navHostFragment= supportFragmentManager.findFragmentById(R.id.navHostFragment) as NavHostFragment
         navController = navHostFragment.navController
         val bottomNavigationView=findViewById<BottomNavigationView>(R.id.bottomNavigationView)
         bottomNavigationView.setupWithNavController(navController!!)
@@ -44,5 +48,15 @@ class MainActivity : AppCompatActivity() {
                 }
 
             }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        navigationToTrackingFragmentIfNeeded(intent)
+    }
+    private fun navigationToTrackingFragmentIfNeeded(intent: Intent?){
+        if (intent?.action==ACTION_SHOW_TRACKING_FRAGMENT){
+            navHostFragment.findNavController().navigate(R.id.action_global_trackingFragment)
+        }
     }
 }
