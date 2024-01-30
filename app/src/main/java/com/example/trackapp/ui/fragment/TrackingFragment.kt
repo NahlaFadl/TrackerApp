@@ -3,6 +3,7 @@ package com.example.trackapp.ui.fragment
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.MediatorLiveData
@@ -13,6 +14,7 @@ import com.example.trackapp.other.Constants.ACTION_START_OR_RESUME_SERVICE
 import com.example.trackapp.other.Constants.MAP_ZOOM
 import com.example.trackapp.other.Constants.POLYLINE_COLOR
 import com.example.trackapp.other.Constants.POLYLINE_WIDTH
+import com.example.trackapp.other.TrackingUtility
 import com.example.trackapp.services.Polyline
 import com.example.trackapp.services.TrackingService
 import com.example.trackapp.ui.viewmodels.MainViewModel
@@ -31,9 +33,12 @@ class TrackingFragment : Fragment(R.layout.fragment_tracking) {
 
     private lateinit var btnToggleRun: MaterialButton
     private lateinit var btnFinishRun: MaterialButton
+    private lateinit var tvTimer: TextView
 
     private var map: GoogleMap? = null
     private var mapView: MapView? = null
+
+    private var currentTimeMillis = 0L
 
     private var isTracking = false
     private var pathPoints = mutableListOf<Polyline>()
@@ -42,6 +47,7 @@ class TrackingFragment : Fragment(R.layout.fragment_tracking) {
         super.onViewCreated(view, savedInstanceState)
         btnToggleRun = view.findViewById<MaterialButton>(R.id.btnToggleRun)
         btnFinishRun = view.findViewById<MaterialButton>(R.id.btnFinishRun)
+        tvTimer = view.findViewById<MaterialButton>(R.id.tvTimer)
         mapView = view.findViewById(R.id.mapView)
         mapView?.onCreate(savedInstanceState)
         btnToggleRun.setOnClickListener {
@@ -54,32 +60,40 @@ class TrackingFragment : Fragment(R.layout.fragment_tracking) {
         subscribeToObserver()
     }
 
-    private fun subscribeToObserver(){
+    private fun subscribeToObserver() {
         TrackingService.isTracking.observe(viewLifecycleOwner, Observer {
             updateTracking(it)
         })
 
         TrackingService.pathPoints.observe(viewLifecycleOwner, Observer {
-            pathPoints=it
+            pathPoints = it
             addLatestPolyLine()
             moveCameraToUser()
         })
+
+        TrackingService.timeRunInMillis.observe(viewLifecycleOwner, Observer {
+            currentTimeMillis=it
+            val formattedTime=TrackingUtility.getFormattedStopWatchedTime(currentTimeMillis,true)
+            tvTimer.text=formattedTime
+        })
     }
-    private fun toggleRun(){
-        if (isTracking){
+
+    private fun toggleRun() {
+        if (isTracking) {
             sendCommendToService(ACTION_PAUSE_SERVICE)
-        }else{
+        } else {
             sendCommendToService(ACTION_START_OR_RESUME_SERVICE)
         }
     }
+
     private fun updateTracking(isTracking: Boolean) {
         this.isTracking = isTracking
         if (!isTracking) {
-            btnToggleRun.text = "start"
+            btnToggleRun.text = "Start"
             btnFinishRun.visibility = View.VISIBLE
         } else {
-            btnToggleRun.text = "start"
-            btnFinishRun.visibility = View.VISIBLE
+            btnToggleRun.text = "Stop"
+            btnFinishRun.visibility = View.GONE
         }
     }
 
