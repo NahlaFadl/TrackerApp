@@ -2,8 +2,13 @@ package com.example.trackapp.ui.fragment
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.ContextMenu
+import android.view.LayoutInflater
+import android.view.Menu
 import android.view.View
+import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.view.get
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.MediatorLiveData
@@ -39,9 +44,19 @@ class TrackingFragment : Fragment(R.layout.fragment_tracking) {
     private var mapView: MapView? = null
 
     private var currentTimeMillis = 0L
+    private var menu: Menu? = null
 
     private var isTracking = false
     private var pathPoints = mutableListOf<Polyline>()
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        setHasOptionsMenu(true)
+        return super.onCreateView(inflater, container, savedInstanceState)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -72,9 +87,9 @@ class TrackingFragment : Fragment(R.layout.fragment_tracking) {
         })
 
         TrackingService.timeRunInMillis.observe(viewLifecycleOwner, Observer {
-            currentTimeMillis=it
-            val formattedTime=TrackingUtility.getFormattedStopWatchedTime(currentTimeMillis,true)
-            tvTimer.text=formattedTime
+            currentTimeMillis = it
+            val formattedTime = TrackingUtility.getFormattedStopWatchedTime(currentTimeMillis, true)
+            tvTimer.text = formattedTime
         })
     }
 
@@ -83,6 +98,22 @@ class TrackingFragment : Fragment(R.layout.fragment_tracking) {
             sendCommendToService(ACTION_PAUSE_SERVICE)
         } else {
             sendCommendToService(ACTION_START_OR_RESUME_SERVICE)
+        }
+    }
+
+    override fun onCreateContextMenu(
+        menu: ContextMenu,
+        v: View,
+        menuInfo: ContextMenu.ContextMenuInfo?
+    ) {
+        super.onCreateContextMenu(menu, v, menuInfo)
+        this.menu = menu
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        super.onPrepareOptionsMenu(menu)
+        if (currentTimeMillis > 0L) {
+            this.menu?.get(0)?.isVisible = true
         }
     }
 
